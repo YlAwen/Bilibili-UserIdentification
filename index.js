@@ -105,7 +105,7 @@
       if (_hasArrContent(reviews)) {
         reviews
           .filter((item) => !reviewOldList.includes(item))
-          .forEach((item, index) => {
+          .forEach((item) => {
             const url = _biliApi + _getUserID(item);
             _request(url, (res) => {
               _renderTag(item, JSON.stringify(res));
