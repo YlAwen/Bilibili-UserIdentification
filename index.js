@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         哔哩哔哩用户成分鉴定
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      0.1
 // @description  B站评论自动标注用户成分。
 // @author       Awen
 // @match        https://www.bilibili.com/video/*
