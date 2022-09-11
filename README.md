@@ -46,4 +46,4 @@
 <br/>
 
 - 那么 up 是什么成分？
-  ![](./images/2.png)
+  - ![](./images/2.png)
