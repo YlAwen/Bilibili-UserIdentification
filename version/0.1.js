@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         哔哩哔哩用户成分鉴定
 // @namespace    http://tampermonkey.net/
-// @version      0.2
-// @description  新版B站评论自动标注用户成分。
+// @version      0.1
+// @description  B站评论自动标注用户成分。
 // @author       Awen
 // @match        https://www.bilibili.com/video/*
 // @icon         https://img1.imgtp.com/2022/08/30/1LkMlj7a.png
@@ -13,10 +13,7 @@
 
 (function () {
   "use strict";
-  console.log("哔哩哔哩用户成分鉴定启动");
-  console.log(
-    "源码仓库：https://github.com/YlAwen/Bilibili-UserIdentification"
-  );
+  let reviewOldList = [];
   let keywordData = [];
   const _biliApi =
     "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space?&host_mid=";
@@ -53,12 +50,12 @@
     });
   };
   // 获取关键字
-  // const _getKeywordData = () => {
-  //   _request(_dataApi, (data) => {
-  //     keywordData = data;
-  //   });
-  // };
-  // _getKeywordData();
+  const _getKeywordData = () => {
+    _request(_dataApi, (data) => {
+      keywordData = data;
+    });
+  };
+  _getKeywordData();
   // 获取用户ID
   const _getUserID = (ele) => {
     return _isNew
@@ -83,61 +80,39 @@
   };
   // 渲染成分
   const _renderTag = (ele, str) => {
-    // 没有关键词数据重新获取关键词
-    // if (!_hasArrContent(keywordData)) {
-    //   _getKeywordData();
-    // } else {
-    let tagList = [];
-    // 筛选加入tag组
-    keywordData.forEach((item) => {
-      item.keywords.forEach((keyword) => {
-        if (str.includes(keyword)) {
-          tagList.push(
-            `<${_tag.tag} class="Awen-tag" ${_renderStyle(_tag.style)}>${
-              item.tag
-            }</${_tag.tag}>`
-          );
-        }
-      });
-    });
-    if (tagList.length === 0) {
-      // 无内容增加标记
-      return (ele.innerHTML += "<span class='Awen-tag'></span>");
+    if (!_hasArrContent(keywordData)) {
+      _getKeywordData();
+      reviewOldList = [];
     } else {
-      // 有内容渲染标签
-      tagList.forEach((item) => {
-        return (ele.innerHTML += item);
+      keywordData.forEach((item) => {
+        item.keywords.forEach((keyword) => {
+          if (str.includes(keyword)) {
+            return (ele.innerHTML += `<${_tag.tag} ${_renderStyle(
+              _tag.style
+            )}>${item.tag}</${_tag.tag}>`);
+          }
+        });
       });
     }
-    // }
   };
   // 循环监听
   const _timer = setInterval(() => {
-    // 新版哔哩哔哩
     if (_isNew) {
-      // 获取所有评论
       const reviews = [
         ..._getReviews("user-name"),
         ..._getReviews("sub-user-name"),
       ];
-      // 有评论
       if (_hasArrContent(reviews)) {
-        reviews.forEach((item) => {
-          let hasTag = false;
-          item.childNodes.forEach((ele) => {
-            if (ele.className === "Awen-tag") {
-              return (hasTag = true);
-            }
-          });
-          // 没有tag渲染tag
-          if (!hasTag) {
+        reviews
+          .filter((item) => !reviewOldList.includes(item))
+          .forEach((item) => {
             const url = _biliApi + _getUserID(item);
             _request(url, (res) => {
               _renderTag(item, JSON.stringify(res));
             });
-          }
-        });
+          });
+        reviewOldList = [...reviewOldList, ...reviews];
       }
     }
-  }, 2000);
+  }, 1500);
 })();
