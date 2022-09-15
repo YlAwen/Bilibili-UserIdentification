@@ -202,7 +202,7 @@
     keywordData.forEach((item) => {
       item.keywords.forEach((keyword) => {
         if (str.includes(keyword)) {
-          tagList.push(
+          return tagList.push(
             `<${_tag.tag} class="Awen-tag" ${_renderStyle(_tag.style)}>${
               item.tag
             }</${_tag.tag}>`
